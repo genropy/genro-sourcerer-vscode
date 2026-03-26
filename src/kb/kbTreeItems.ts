@@ -18,7 +18,7 @@ export class SkillItem extends vscode.TreeItem {
     public readonly topicName: string
   ) {
     super(skill.title, vscode.TreeItemCollapsibleState.None);
-    this.tooltip = skill.description ?? skill.title;
+    this.tooltip = skill.content_preview || skill.title;
     this.contextValue = "skill";
     this.iconPath = new vscode.ThemeIcon(
       skill.status === "verified" ? "verified" : "file-text"

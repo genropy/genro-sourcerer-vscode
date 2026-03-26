@@ -21,9 +21,7 @@
     "knowledge-base",
     "code-index"
   ],
-  "activationEvents": [
-    "onView:sourcerer.kbExplorer"
-  ],
+  "activationEvents": [],
   "main": "./dist/extension.js",
   "contributes": {
     "viewsContainers": {
@@ -31,7 +29,7 @@
         {
           "id": "sourcerer",
           "title": "Sourcerer",
-          "icon": "resources/icons/sourcerer.svg"
+          "icon": "resources/icons/sourcerer_logo_transparent.svg"
         }
       ]
     },
@@ -41,6 +39,22 @@
           "id": "sourcerer.kbExplorer",
           "name": "Knowledge Base",
           "icon": "resources/icons/topic.svg"
+        },
+        {
+          "id": "sourcerer.searchTools",
+          "name": "Search & Ask"
+        },
+        {
+          "id": "sourcerer.codeTools",
+          "name": "Code"
+        },
+        {
+          "id": "sourcerer.semTools",
+          "name": "Semantic"
+        },
+        {
+          "id": "sourcerer.ghTools",
+          "name": "GitHub"
         }
       ]
     },
@@ -66,6 +80,46 @@
       {
         "command": "sourcerer.checkConnection",
         "title": "Sourcerer: Check Connection"
+      },
+      {
+        "command": "sourcerer.findSkills",
+        "title": "Sourcerer: Find Skills"
+      },
+      {
+        "command": "sourcerer.searchCode",
+        "title": "Sourcerer: Search Code"
+      },
+      {
+        "command": "sourcerer.searchSymbols",
+        "title": "Sourcerer: Search Symbols"
+      },
+      {
+        "command": "sourcerer.classHierarchy",
+        "title": "Sourcerer: Class Hierarchy"
+      },
+      {
+        "command": "sourcerer.symbolDetail",
+        "title": "Sourcerer: Symbol Detail"
+      },
+      {
+        "command": "sourcerer.symbolSource",
+        "title": "Sourcerer: Symbol Source"
+      },
+      {
+        "command": "sourcerer.listProjects",
+        "title": "Sourcerer: List Projects"
+      },
+      {
+        "command": "sourcerer.askCodebase",
+        "title": "Sourcerer: Ask Codebase"
+      },
+      {
+        "command": "sourcerer.fulltextSearch",
+        "title": "Sourcerer: Fulltext Search"
+      },
+      {
+        "command": "sourcerer.listRepositories",
+        "title": "Sourcerer: List Repositories"
       }
     ],
     "menus": {

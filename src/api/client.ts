@@ -5,6 +5,15 @@ import {
   Skill,
   AskResult,
   HealthResponse,
+  CodeMatch,
+  SymbolMatch,
+  ClassHierarchyEntry,
+  SymbolDetail,
+  SymbolSource,
+  ProjectInfo,
+  SemanticMatch,
+  FulltextMatch,
+  RepositoryInfo,
 } from "./types";
 
 interface ClientOptions {
@@ -52,12 +61,12 @@ export class SourcererClient {
 
   /** Get the full topic tree. */
   async getTopicTree(): Promise<TopicTree> {
-    return this._get<TopicTree>("/api/kb/topic_tree", { useCache: true });
+    return this._get<TopicTree>("/api/kb/get_topic_tree", { useCache: true });
   }
 
   /** Get skills for a given topic. */
   async getSkills(topicName: string): Promise<SkillSummary[]> {
-    return this._get<SkillSummary[]>("/api/kb/skills", {
+    return this._get<SkillSummary[]>("/api/kb/get_skills", {
       params: { topic: topicName },
       useCache: true,
     });
@@ -65,7 +74,7 @@ export class SourcererClient {
 
   /** Get full skill content by ID. */
   async getSkillContent(skillId: string): Promise<Skill> {
-    return this._get<Skill>("/api/kb/skill_content", {
+    return this._get<Skill>("/api/kb/get_skill_content", {
       params: { skill_id: skillId },
       useCache: true,
     });
@@ -73,7 +82,85 @@ export class SourcererClient {
 
   /** Semantic triage query. */
   async ask(question: string): Promise<AskResult> {
-    return this._post<AskResult>("/api/kb/ask", { question });
+    return this._get<AskResult>("/api/kb/ask", {
+      params: { question },
+    });
+  }
+
+  /** Find skills by semantic similarity. */
+  async findSkills(question: string): Promise<AskResult> {
+    return this._get<AskResult>("/api/kb/find_skills", {
+      params: { question },
+    });
+  }
+
+  // --- Code ---
+
+  /** Full-text search in source code. */
+  async searchCode(query: string): Promise<CodeMatch[]> {
+    return this._get<CodeMatch[]>("/api/code/search_code", {
+      params: { query },
+    });
+  }
+
+  /** Search symbols by name pattern. */
+  async searchSymbols(query: string): Promise<SymbolMatch[]> {
+    return this._get<SymbolMatch[]>("/api/code/search_symbols", {
+      params: { query },
+    });
+  }
+
+  /** Get class hierarchy. */
+  async getClassHierarchy(className: string): Promise<ClassHierarchyEntry[]> {
+    return this._get<ClassHierarchyEntry[]>("/api/code/get_class_hierarchy", {
+      params: { class_name: className },
+    });
+  }
+
+  /** Get symbol detail. */
+  async getSymbolDetail(qualifiedName: string): Promise<SymbolDetail> {
+    return this._get<SymbolDetail>("/api/code/get_symbol_detail", {
+      params: { qualified_name: qualifiedName },
+    });
+  }
+
+  /** Get symbol source code. */
+  async getSymbolSource(qualifiedName: string): Promise<SymbolSource> {
+    return this._get<SymbolSource>("/api/code/get_symbol_source", {
+      params: { qualified_name: qualifiedName },
+    });
+  }
+
+  /** List indexed projects. */
+  async listProjects(): Promise<ProjectInfo[]> {
+    return this._get<ProjectInfo[]>("/api/code/list_projects", {
+      useCache: true,
+    });
+  }
+
+  // --- Semantic ---
+
+  /** Semantic search over indexed codebase. */
+  async askCodebase(question: string): Promise<SemanticMatch[]> {
+    return this._get<SemanticMatch[]>("/api/sem/ask_codebase", {
+      params: { question },
+    });
+  }
+
+  /** Fulltext search across all indexed content. */
+  async searchFulltext(query: string): Promise<FulltextMatch[]> {
+    return this._get<FulltextMatch[]>("/api/sem/search_fulltext", {
+      params: { query },
+    });
+  }
+
+  // --- GitHub ---
+
+  /** List indexed repositories. */
+  async listRepositories(): Promise<RepositoryInfo[]> {
+    return this._get<RepositoryInfo[]>("/api/gh/list_repositories", {
+      useCache: true,
+    });
   }
 
   clearCache(): void {
@@ -107,34 +194,14 @@ export class SourcererClient {
       headers: this._headers(),
     });
     const body = (await resp.json()) as ApiResponse<T>;
-    if (!body.ok) {
-      throw new Error(body.error ?? `API error: ${resp.status}`);
+    if (body.error) {
+      throw new Error(body.error);
     }
 
     if (options?.useCache) {
-      this._cache.set(cacheKey, { data: body.result, timestamp: Date.now() });
+      this._cache.set(cacheKey, { data: body.data, timestamp: Date.now() });
     }
-    return body.result;
-  }
-
-  private async _post<T>(
-    path: string,
-    payload: Record<string, unknown>
-  ): Promise<T> {
-    const url = new URL(path, this._baseUrl);
-    const resp = await fetch(url.toString(), {
-      method: "POST",
-      headers: {
-        ...this._headers(),
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(payload),
-    });
-    const body = (await resp.json()) as ApiResponse<T>;
-    if (!body.ok) {
-      throw new Error(body.error ?? `API error: ${resp.status}`);
-    }
-    return body.result;
+    return body.data;
   }
 
   private _headers(): Record<string, string> {
