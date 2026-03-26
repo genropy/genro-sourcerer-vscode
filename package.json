@@ -1,0 +1,138 @@
+{
+  "name": "genro-sourcerer-vscode",
+  "displayName": "Sourcerer Visual",
+  "description": "Visual explorer for Sourcerer Knowledge Base — browse topics, skills, and codebase insights from VSCode",
+  "version": "0.1.0",
+  "publisher": "genropy",
+  "license": "Apache-2.0",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/genropy/genro-sourcerer-vscode"
+  },
+  "engines": {
+    "vscode": "^1.85.0"
+  },
+  "categories": [
+    "Other"
+  ],
+  "keywords": [
+    "sourcerer",
+    "genropy",
+    "knowledge-base",
+    "code-index"
+  ],
+  "activationEvents": [
+    "onView:sourcerer.kbExplorer"
+  ],
+  "main": "./dist/extension.js",
+  "contributes": {
+    "viewsContainers": {
+      "activitybar": [
+        {
+          "id": "sourcerer",
+          "title": "Sourcerer",
+          "icon": "resources/icons/sourcerer.svg"
+        }
+      ]
+    },
+    "views": {
+      "sourcerer": [
+        {
+          "id": "sourcerer.kbExplorer",
+          "name": "Knowledge Base",
+          "icon": "resources/icons/topic.svg"
+        }
+      ]
+    },
+    "commands": [
+      {
+        "command": "sourcerer.refresh",
+        "title": "Sourcerer: Refresh",
+        "icon": "$(refresh)"
+      },
+      {
+        "command": "sourcerer.viewSkill",
+        "title": "Sourcerer: View Skill"
+      },
+      {
+        "command": "sourcerer.search",
+        "title": "Sourcerer: Search Knowledge Base",
+        "icon": "$(search)"
+      },
+      {
+        "command": "sourcerer.ask",
+        "title": "Sourcerer: Ask"
+      },
+      {
+        "command": "sourcerer.checkConnection",
+        "title": "Sourcerer: Check Connection"
+      }
+    ],
+    "menus": {
+      "view/title": [
+        {
+          "command": "sourcerer.refresh",
+          "when": "view == sourcerer.kbExplorer",
+          "group": "navigation"
+        },
+        {
+          "command": "sourcerer.search",
+          "when": "view == sourcerer.kbExplorer",
+          "group": "navigation"
+        }
+      ]
+    },
+    "configuration": {
+      "title": "Sourcerer",
+      "properties": {
+        "sourcerer.apiUrl": {
+          "type": "string",
+          "default": "https://sourcerer.genropy.net",
+          "description": "Sourcerer API base URL"
+        },
+        "sourcerer.token": {
+          "type": "string",
+          "default": "",
+          "description": "Authentication token for Sourcerer API"
+        },
+        "sourcerer.cacheTtlSeconds": {
+          "type": "number",
+          "default": 300,
+          "description": "Cache TTL in seconds for API responses"
+        }
+      }
+    },
+    "viewsWelcome": [
+      {
+        "view": "sourcerer.kbExplorer",
+        "contents": "No connection to Sourcerer.\n[Configure Connection](command:sourcerer.checkConnection)\n\nSet your API URL and token in Settings > Sourcerer."
+      }
+    ]
+  },
+  "scripts": {
+    "compile": "esbuild src/extension.ts --bundle --outfile=dist/extension.js --external:vscode --format=cjs --platform=node --sourcemap",
+    "watch": "npm run compile -- --watch",
+    "lint": "eslint src/ --ext .ts",
+    "test": "node ./out/test/runTest.js",
+    "pretest": "tsc -p ./tsconfig.test.json",
+    "package": "vsce package",
+    "publish": "vsce publish"
+  },
+  "dependencies": {
+    "markdown-it": "^14.0.0"
+  },
+  "devDependencies": {
+    "@types/markdown-it": "^14.0.0",
+    "@types/mocha": "^10.0.0",
+    "@types/node": "^20.0.0",
+    "@types/vscode": "^1.85.0",
+    "@typescript-eslint/eslint-plugin": "^7.0.0",
+    "@typescript-eslint/parser": "^7.0.0",
+    "@vscode/test-electron": "^2.3.0",
+    "@vscode/vsce": "^2.24.0",
+    "esbuild": "^0.20.0",
+    "eslint": "^8.56.0",
+    "mocha": "^10.2.0",
+    "typescript": "^5.3.0"
+  }
+}
