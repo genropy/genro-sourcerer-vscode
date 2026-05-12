@@ -2,10 +2,10 @@ import * as vscode from "vscode";
 import type { SourcererClient } from "../api/client";
 import type { KBTreeProvider } from "./kbTreeProvider";
 import { SkillPreview } from "./skillPreview";
-import { SearchResultsPanel } from "../tools/searchResultsPanel";
 
 /**
- * Register all KB-related commands.
+ * Register KB-specific commands (tree refresh, skill preview, connection check).
+ * Search/Ask/FindSkills are now handled by the Workbench panel.
  */
 export function registerKBCommands(
   context: vscode.ExtensionContext,
@@ -28,114 +28,6 @@ export function registerKBCommands(
         );
       }
     ),
-
-    vscode.commands.registerCommand("sourcerer.search", async () => {
-      const query = await vscode.window.showInputBox({
-        prompt: "Search the Knowledge Base",
-        placeHolder: "e.g. formulaColumn, deploy, batch actions...",
-      });
-      if (!query) {
-        return;
-      }
-      try {
-        const result = await client.ask(query);
-        if (result.skills.length === 0) {
-          vscode.window.showInformationMessage(
-            "No matching skills found."
-          );
-          return;
-        }
-        const picked = await vscode.window.showQuickPick(
-          result.skills.map((s) => ({
-            label: s.title,
-            description: s.topic_path,
-            detail: `Score: ${(s.similarity * 100).toFixed(0)}%`,
-            skillId: s.id,
-          })),
-          { placeHolder: "Select a skill to view" }
-        );
-        if (picked) {
-          await SkillPreview.show(
-            client,
-            picked.skillId,
-            picked.label,
-            context.extensionUri
-          );
-        }
-      } catch (err) {
-        vscode.window.showErrorMessage(
-          `Search failed: ${err instanceof Error ? err.message : String(err)}`
-        );
-      }
-    }),
-
-    vscode.commands.registerCommand("sourcerer.ask", async () => {
-      const question = await vscode.window.showInputBox({
-        prompt: "Ask Sourcerer",
-        placeHolder: "e.g. How does formulaColumn work?",
-      });
-      if (!question) {
-        return;
-      }
-      try {
-        const result = await client.ask(question);
-        if (result.skills.length === 0) {
-          vscode.window.showInformationMessage("No results found.");
-          return;
-        }
-        SearchResultsPanel.show(
-          `Ask: ${question}`,
-          result.skills.map((s) => ({
-            title: s.title,
-            subtitle: `${s.topic_path} — Score: ${(s.similarity * 100).toFixed(0)}%`,
-            code: s.content,
-            language: "markdown",
-          }))
-        );
-      } catch (err) {
-        vscode.window.showErrorMessage(
-          `Ask failed: ${err instanceof Error ? err.message : String(err)}`
-        );
-      }
-    }),
-
-    vscode.commands.registerCommand("sourcerer.findSkills", async () => {
-      const query = await vscode.window.showInputBox({
-        prompt: "Find skills by semantic similarity",
-        placeHolder: "e.g. batch processing, data validation...",
-      });
-      if (!query) {
-        return;
-      }
-      try {
-        const result = await client.findSkills(query);
-        if (result.skills.length === 0) {
-          vscode.window.showInformationMessage("No matching skills found.");
-          return;
-        }
-        const picked = await vscode.window.showQuickPick(
-          result.skills.map((s) => ({
-            label: s.title,
-            description: s.topic_path,
-            detail: `Score: ${(s.similarity * 100).toFixed(0)}%`,
-            skillId: s.id,
-          })),
-          { placeHolder: "Select a skill to view" }
-        );
-        if (picked) {
-          await SkillPreview.show(
-            client,
-            picked.skillId,
-            picked.label,
-            context.extensionUri
-          );
-        }
-      } catch (err) {
-        vscode.window.showErrorMessage(
-          `Find skills failed: ${err instanceof Error ? err.message : String(err)}`
-        );
-      }
-    }),
 
     vscode.commands.registerCommand(
       "sourcerer.checkConnection",

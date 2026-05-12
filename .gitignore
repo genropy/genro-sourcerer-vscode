@@ -34,3 +34,6 @@ docs/_build/
 *.swp
 *.swo
 *~
+
+# Transient working dir (convention: temp/ is for ephemeral files)
+temp/

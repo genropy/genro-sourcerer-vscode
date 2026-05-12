@@ -37,28 +37,20 @@
       "sourcerer": [
         {
           "id": "sourcerer.kbExplorer",
-          "name": "Knowledge Base",
-          "icon": "resources/icons/topic.svg"
+          "name": "Knowledge Base"
         },
         {
-          "id": "sourcerer.searchTools",
-          "name": "Search & Ask"
-        },
-        {
-          "id": "sourcerer.codeTools",
-          "name": "Code"
-        },
-        {
-          "id": "sourcerer.semTools",
-          "name": "Semantic"
-        },
-        {
-          "id": "sourcerer.ghTools",
-          "name": "GitHub"
+          "id": "sourcerer.toolsExplorer",
+          "name": "Tools"
         }
       ]
     },
     "commands": [
+      {
+        "command": "sourcerer.open",
+        "title": "Sourcerer: Open",
+        "icon": "$(search)"
+      },
       {
         "command": "sourcerer.refresh",
         "title": "Sourcerer: Refresh",
@@ -69,57 +61,12 @@
         "title": "Sourcerer: View Skill"
       },
       {
-        "command": "sourcerer.search",
-        "title": "Sourcerer: Search Knowledge Base",
-        "icon": "$(search)"
-      },
-      {
-        "command": "sourcerer.ask",
-        "title": "Sourcerer: Ask"
-      },
-      {
         "command": "sourcerer.checkConnection",
         "title": "Sourcerer: Check Connection"
       },
       {
-        "command": "sourcerer.findSkills",
-        "title": "Sourcerer: Find Skills"
-      },
-      {
-        "command": "sourcerer.searchCode",
-        "title": "Sourcerer: Search Code"
-      },
-      {
-        "command": "sourcerer.searchSymbols",
-        "title": "Sourcerer: Search Symbols"
-      },
-      {
-        "command": "sourcerer.classHierarchy",
-        "title": "Sourcerer: Class Hierarchy"
-      },
-      {
-        "command": "sourcerer.symbolDetail",
-        "title": "Sourcerer: Symbol Detail"
-      },
-      {
-        "command": "sourcerer.symbolSource",
-        "title": "Sourcerer: Symbol Source"
-      },
-      {
-        "command": "sourcerer.listProjects",
-        "title": "Sourcerer: List Projects"
-      },
-      {
-        "command": "sourcerer.askCodebase",
-        "title": "Sourcerer: Ask Codebase"
-      },
-      {
-        "command": "sourcerer.fulltextSearch",
-        "title": "Sourcerer: Fulltext Search"
-      },
-      {
-        "command": "sourcerer.listRepositories",
-        "title": "Sourcerer: List Repositories"
+        "command": "sourcerer.reloadSchema",
+        "title": "Sourcerer: Reload Schema"
       }
     ],
     "menus": {
@@ -130,7 +77,7 @@
           "group": "navigation"
         },
         {
-          "command": "sourcerer.search",
+          "command": "sourcerer.open",
           "when": "view == sourcerer.kbExplorer",
           "group": "navigation"
         }

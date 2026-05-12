@@ -59,9 +59,12 @@ export class SourcererClient {
     return this._get<HealthResponse>("/api/srv/health");
   }
 
-  /** Get the full topic tree. */
+  /** Get the full topic tree, including private (tagged) topics. */
   async getTopicTree(): Promise<TopicTree> {
-    return this._get<TopicTree>("/api/kb/get_topic_tree", { useCache: true });
+    return this._get<TopicTree>("/api/kb/get_topic_tree", {
+      params: { tags: "all" },
+      useCache: true,
+    });
   }
 
   /** Get skills for a given topic. */
@@ -161,6 +164,14 @@ export class SourcererClient {
     return this._get<RepositoryInfo[]>("/api/gh/list_repositories", {
       useCache: true,
     });
+  }
+
+  /** Generic endpoint call — used by the dynamic workbench. */
+  async callEndpoint(
+    path: string,
+    params: Record<string, string>
+  ): Promise<unknown> {
+    return this._get<unknown>(path, { params });
   }
 
   clearCache(): void {

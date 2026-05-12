@@ -148,9 +148,10 @@ export interface SemanticMatch {
 /** Fulltext search result. */
 export interface FulltextMatch {
   document_type: string;
-  source_column: string;
-  source_fkey: string;
-  snippet: string;
+  name: string;
+  author_name: string | null;
+  repo_name: string | null;
+  document_snippet: string;
   rank: number;
 }
 
