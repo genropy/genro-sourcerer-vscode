@@ -27,3 +27,4 @@ a link to the new one), instead of editing history.
 - [ADR-002 — Schema-driven tools](ADR-002-schema-driven-tools.md)
 - [ADR-003 — Separate KB and Tools trees](ADR-003-separate-kb-and-tools-trees.md)
 - [ADR-004 — Distribution via GitHub Releases](ADR-004-distribution-via-github-releases.md)
+- [ADR-005 — OpenAPI view, extractable](ADR-005-openapi-view-extractable.md)

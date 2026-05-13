@@ -8,6 +8,9 @@ import { loadToolDefs } from "./schema/schemaLoader";
 import type { ToolDef } from "./schema/types";
 import { getSettings } from "./config/settings";
 import { Logger } from "./utils/logger";
+import { SchemaRegistry } from "./openapi/schemaRegistry";
+import { SchemasTreeProvider } from "./openapi/schemasTreeProvider";
+import { registerOpenApiCommands } from "./openapi/openapiCommands";
 
 let logger: Logger;
 let toolDefs: ToolDef[] = [];
@@ -38,6 +41,16 @@ export function activate(context: vscode.ExtensionContext): void {
   // Load schema and populate tools tree
   loadSchema(client, toolsProvider);
 
+  // OpenAPI registry + tree (independent of Sourcerer)
+  const openapiRegistry = new SchemaRegistry();
+  const openapiProvider = new SchemasTreeProvider(openapiRegistry);
+  const openapiView = vscode.window.createTreeView(
+    "sourcerer.openapiExplorer",
+    { treeDataProvider: openapiProvider, showCollapseAll: true }
+  );
+  openapiRegistry.refresh();
+  registerOpenApiCommands(context, openapiRegistry);
+
   // Commands
   context.subscriptions.push(
     vscode.commands.registerCommand("sourcerer.open", (tabId?: string) => {
@@ -55,6 +68,7 @@ export function activate(context: vscode.ExtensionContext): void {
   context.subscriptions.push(
     kbView,
     toolsView,
+    openapiView,
     logger,
     vscode.workspace.onDidChangeConfiguration((e) => {
       if (e.affectsConfiguration("sourcerer")) {
@@ -66,6 +80,9 @@ export function activate(context: vscode.ExtensionContext): void {
         WorkbenchPanel.updateClient(client);
         loadSchema(client, toolsProvider);
       }
+      if (e.affectsConfiguration("openapi.schemas")) {
+        openapiRegistry.refresh();
+      }
     })
   );
 
@@ -76,6 +93,7 @@ async function loadSchema(
   client: SourcererClient,
   toolsProvider: ToolTreeProvider
 ): Promise<void> {
+  // Uses SOURCERER_LOAD_OPTIONS by default (path /api/code/openapi_schema, /api prefix, ...)
   try {
     toolDefs = await loadToolDefs(client);
     toolsProvider.setTools(toolDefs);

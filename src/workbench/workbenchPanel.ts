@@ -1,22 +1,32 @@
 import * as vscode from "vscode";
-import type { SourcererClient } from "../api/client";
 import type { ToolDef } from "../schema/types";
 import { getWorkbenchHtml } from "./workbenchHtml";
 import { renderResults } from "./resultRenderer";
 
 /**
- * Singleton WebviewPanel that hosts all Sourcerer tools.
+ * Minimal interface a Workbench client must implement.
+ * Decouples the panel from any specific HTTP client.
+ */
+export interface ToolRunner {
+  callEndpoint(
+    path: string,
+    params: Record<string, string>
+  ): Promise<unknown>;
+}
+
+/**
+ * Singleton WebviewPanel that hosts all tool tabs.
  * Tools, forms, and rendering are all driven by the OpenAPI schema.
  */
 export class WorkbenchPanel {
   private static _instance: WorkbenchPanel | undefined;
 
   private _panel: vscode.WebviewPanel;
-  private _client: SourcererClient;
+  private _client: ToolRunner;
   private _toolMap: Map<string, ToolDef>;
 
   private constructor(
-    client: SourcererClient,
+    client: ToolRunner,
     extensionUri: vscode.Uri,
     tools: ToolDef[]
   ) {
@@ -45,7 +55,7 @@ export class WorkbenchPanel {
   }
 
   static open(
-    client: SourcererClient,
+    client: ToolRunner,
     extensionUri: vscode.Uri,
     tools: ToolDef[],
     tabId?: string
@@ -67,7 +77,7 @@ export class WorkbenchPanel {
     }
   }
 
-  static updateClient(client: SourcererClient): void {
+  static updateClient(client: ToolRunner): void {
     if (WorkbenchPanel._instance) {
       WorkbenchPanel._instance._client = client;
     }

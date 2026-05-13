@@ -1,24 +1,52 @@
-import type { SourcererClient } from "../api/client";
+import type { ToolRunner } from "../workbench/workbenchPanel";
 import type { ToolDef, ParamDef, ResponseFieldDef, RenderHint } from "./types";
 
-const EXCLUDED_PREFIXES = ["admin", "srv"];
-const EXCLUDED_PATHS = new Set([
-  "/code/openapi_schema",
-  "/kb/get_topic_tree",
-  "/kb/get_skills",
-  "/kb/export_knowledge",
-]);
-
-const CATEGORY_LABELS: Record<string, string> = {
-  kb: "Knowledge Base",
-  code: "Code",
-  sem: "Semantic",
-  gh: "GitHub",
-  ctx: "Contexts",
-  impact: "Impact",
-  err: "Errors",
-  sweeter: "Sweeter",
+/**
+ * Sourcerer-specific defaults. Kept exported so existing callers
+ * continue to work, and so a future extraction can drop these
+ * without breaking the generic loader.
+ */
+export const SOURCERER_LOAD_OPTIONS: LoadOptions = {
+  schemaPath: "/api/code/openapi_schema",
+  pathPrefix: "/api",
+  excludedPrefixes: ["admin", "srv"],
+  excludedPaths: [
+    "/code/openapi_schema",
+    "/kb/get_topic_tree",
+    "/kb/get_skills",
+    "/kb/export_knowledge",
+  ],
+  categoryLabels: {
+    kb: "Knowledge Base",
+    code: "Code",
+    sem: "Semantic",
+    gh: "GitHub",
+    ctx: "Contexts",
+    impact: "Impact",
+    err: "Errors",
+    sweeter: "Sweeter",
+  },
+  envelopeDataKey: undefined,
 };
+
+export interface LoadOptions {
+  /** Path to fetch the OpenAPI document from. */
+  schemaPath: string;
+  /** Prefix to prepend to each tool's `path`. Sourcerer uses "/api". */
+  pathPrefix: string;
+  /** First-path-segment prefixes to skip entirely (e.g. "admin"). */
+  excludedPrefixes: string[];
+  /** Specific paths to skip (the schema endpoint itself, KB tree ops, etc.). */
+  excludedPaths: string[];
+  /** Pretty labels for first-path-segment categories. */
+  categoryLabels: Record<string, string>;
+  /**
+   * If set, the loader unwraps `response[envelopeDataKey]` before reading
+   * the OpenAPI document. Sourcerer wraps it under `data`; pure OpenAPI
+   * endpoints typically don't wrap at all (leave undefined).
+   */
+  envelopeDataKey?: string;
+}
 
 // Category icons are sourced from OpenAPI per-operation extension
 // `x-category-icon`. We collect the first non-empty value we encounter
@@ -40,23 +68,28 @@ const LIST_FIELDS = new Set(["subclasses", "children", "frames", "callers", "ref
  * Only GET endpoints are included. Admin/srv/meta endpoints are excluded.
  */
 export async function loadToolDefs(
-  client: SourcererClient
+  client: ToolRunner,
+  options: LoadOptions = SOURCERER_LOAD_OPTIONS
 ): Promise<ToolDef[]> {
-  const raw = await client.callEndpoint("/api/code/openapi_schema", {});
-  const schema = raw as {
+  const raw = await client.callEndpoint(options.schemaPath, {});
+  const doc = options.envelopeDataKey
+    ? (raw as Record<string, unknown>)[options.envelopeDataKey]
+    : raw;
+  const schema = doc as {
     paths: Record<string, Record<string, OpenApiOperation>>;
     $defs?: Record<string, OpenApiSchema>;
   };
 
+  const excludedPaths = new Set(options.excludedPaths);
   const globalDefs = schema.$defs ?? {};
   const tools: ToolDef[] = [];
 
   for (const [path, methods] of Object.entries(schema.paths)) {
-    if (EXCLUDED_PATHS.has(path)) {
+    if (excludedPaths.has(path)) {
       continue;
     }
     const category = path.replace(/^\//, "").split("/")[0];
-    if (EXCLUDED_PREFIXES.includes(category)) {
+    if (options.excludedPrefixes.includes(category)) {
       continue;
     }
     const op = methods["get"];
@@ -70,11 +103,11 @@ export async function loadToolDefs(
     const operationId = op.operationId ?? path;
     tools.push({
       id: operationId,
-      path: `/api${path}`,
+      path: `${options.pathPrefix}${path}`,
       category,
-      categoryLabel: CATEGORY_LABELS[category] ?? category,
+      categoryLabel: options.categoryLabels[category] ?? category,
       categoryIcon: op["x-category-icon"],
-      label: buildLabel(op),
+      label: buildLabel(op, options.categoryLabels),
       icon: op["x-icon"],
       description: op.description ?? op.summary ?? "",
       params,
@@ -94,9 +127,12 @@ export async function loadToolDefs(
   return tools;
 }
 
-function buildLabel(op: OpenApiOperation): string {
+function buildLabel(
+  op: OpenApiOperation,
+  categoryLabels: Record<string, string>
+): string {
   if (op.operationId) {
-    const stripped = stripCategoryPrefixGuess(op.operationId);
+    const stripped = stripCategoryPrefixGuess(op.operationId, categoryLabels);
     return stripped
       .replace(/_/g, " ")
       .replace(/\b\w/g, (c) => c.toUpperCase());
@@ -104,13 +140,16 @@ function buildLabel(op: OpenApiOperation): string {
   return op.summary?.split(".")[0] ?? "Unknown";
 }
 
-function stripCategoryPrefixGuess(operationId: string): string {
+function stripCategoryPrefixGuess(
+  operationId: string,
+  categoryLabels: Record<string, string>
+): string {
   const underscore = operationId.indexOf("_");
   if (underscore <= 0) {
     return operationId;
   }
   const head = operationId.slice(0, underscore);
-  if (head in CATEGORY_LABELS) {
+  if (head in categoryLabels) {
     return operationId.slice(underscore + 1);
   }
   return operationId;

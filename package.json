@@ -2,7 +2,7 @@
   "name": "genro-sourcerer-vscode",
   "displayName": "Sourcerer Visual",
   "description": "Visual explorer for Sourcerer Knowledge Base — browse topics, skills, and codebase insights from VSCode",
-  "version": "0.2.2",
+  "version": "0.3.0",
   "publisher": "genropy",
   "license": "Apache-2.0",
   "repository": {
@@ -42,6 +42,10 @@
         {
           "id": "sourcerer.toolsExplorer",
           "name": "Tools"
+        },
+        {
+          "id": "sourcerer.openapiExplorer",
+          "name": "OpenAPI"
         }
       ]
     },
@@ -67,6 +71,29 @@
       {
         "command": "sourcerer.reloadSchema",
         "title": "Sourcerer: Reload Schema"
+      },
+      {
+        "command": "openapi.addSchema",
+        "title": "Add OpenAPI Schema",
+        "category": "OpenAPI",
+        "icon": "$(add)"
+      },
+      {
+        "command": "openapi.removeSchema",
+        "title": "Remove OpenAPI Schema",
+        "category": "OpenAPI",
+        "icon": "$(trash)"
+      },
+      {
+        "command": "openapi.reloadSchema",
+        "title": "Reload OpenAPI Schema",
+        "category": "OpenAPI",
+        "icon": "$(refresh)"
+      },
+      {
+        "command": "openapi.runTool",
+        "title": "Run OpenAPI Tool",
+        "category": "OpenAPI"
       }
     ],
     "menus": {
@@ -80,6 +107,23 @@
           "command": "sourcerer.open",
           "when": "view == sourcerer.kbExplorer",
           "group": "navigation"
+        },
+        {
+          "command": "openapi.addSchema",
+          "when": "view == sourcerer.openapiExplorer",
+          "group": "navigation"
+        }
+      ],
+      "view/item/context": [
+        {
+          "command": "openapi.reloadSchema",
+          "when": "view == sourcerer.openapiExplorer && viewItem == openapiSchema",
+          "group": "inline"
+        },
+        {
+          "command": "openapi.removeSchema",
+          "when": "view == sourcerer.openapiExplorer && viewItem == openapiSchema",
+          "group": "inline"
         }
       ]
     },
@@ -100,6 +144,22 @@
           "type": "number",
           "default": 300,
           "description": "Cache TTL in seconds for API responses"
+        },
+        "openapi.schemas": {
+          "type": "array",
+          "default": [],
+          "description": "List of registered OpenAPI schemas.",
+          "items": {
+            "type": "object",
+            "required": ["id", "name", "url", "schemaUrl", "auth"],
+            "properties": {
+              "id": { "type": "string" },
+              "name": { "type": "string" },
+              "url": { "type": "string" },
+              "schemaUrl": { "type": "string" },
+              "auth": { "type": "object" }
+            }
+          }
         }
       }
     },
@@ -107,6 +167,10 @@
       {
         "view": "sourcerer.kbExplorer",
         "contents": "No connection to Sourcerer.\n[Configure Connection](command:sourcerer.checkConnection)\n\nSet your API URL and token in Settings > Sourcerer."
+      },
+      {
+        "view": "sourcerer.openapiExplorer",
+        "contents": "No OpenAPI schemas registered yet.\n[Add Schema](command:openapi.addSchema)\n\nYou can register any OpenAPI 3.x document and call its endpoints from the Workbench."
       }
     ]
   },

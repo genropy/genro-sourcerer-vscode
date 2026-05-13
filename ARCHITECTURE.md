@@ -233,6 +233,7 @@ Listed here so they do not creep in by accident:
 - `docs/decisions/ADR-002-schema-driven-tools.md`
 - `docs/decisions/ADR-003-separate-kb-and-tools-trees.md`
 - `docs/decisions/ADR-004-distribution-via-github-releases.md`
+- `docs/decisions/ADR-005-openapi-view-extractable.md`
 - `docs/design/workbench-refactor.md` (active work)
 - `docs/design/genropy-debug.md` (deferred work item)
 - `docs/design/claude-sessions-view.md` (deferred work item)
