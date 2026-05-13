@@ -2,7 +2,7 @@
   "name": "genro-sourcerer-vscode",
   "displayName": "Sourcerer Visual",
   "description": "Visual explorer for Sourcerer Knowledge Base — browse topics, skills, and codebase insights from VSCode",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "publisher": "genropy",
   "license": "Apache-2.0",
   "repository": {

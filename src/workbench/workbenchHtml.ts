@@ -363,6 +363,11 @@ export function getWorkbenchHtml(
       panel.querySelectorAll('.doc-tab').forEach(t => {
         t.addEventListener('click', () => activateDocTab(tabId, t.dataset.docTab));
       });
+
+      // Wire up the Run button (CSP forbids inline onclick handlers)
+      panel.querySelectorAll('.run-btn[data-run-tab]').forEach(btn => {
+        btn.addEventListener('click', () => runTool(btn.dataset.runTab));
+      });
     }
 
     function activateTab(tabId) {
@@ -486,7 +491,7 @@ export function getWorkbenchHtml(
       tool.params.forEach(p => { html += buildField(p, doc.args[p.name]); });
       html += ''
         + '  <div class="actions">'
-        + '    <button class="run-btn" onclick="runTool(\\''+tool.id+'\\')">Run</button>'
+        + '    <button class="run-btn" data-run-tab="' + tool.id + '">Run</button>'
         + '  </div>'
         + '</div>';
 
@@ -507,7 +512,6 @@ export function getWorkbenchHtml(
       panel.querySelectorAll('.doc-section').forEach(s =>
         s.classList.toggle('active', s.dataset.docSection === docKey));
     }
-    window.activateDocTab = activateDocTab;
 
     const TEXTAREA_PARAMS = ['xml', 'traceback', 'body', 'content', 'source', 'patterns'];
 
@@ -586,9 +590,6 @@ export function getWorkbenchHtml(
       if (results) results.innerHTML = '<div class="loading">Loading...</div>';
       vscode.postMessage({ command: 'search', tab: tabId, params: params });
     }
-
-    // Make runTool available to onclick
-    window.runTool = runTool;
 
     window.addEventListener('message', (event) => {
       const msg = event.data;
