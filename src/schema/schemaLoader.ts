@@ -20,52 +20,10 @@ const CATEGORY_LABELS: Record<string, string> = {
   sweeter: "Sweeter",
 };
 
-const CATEGORY_ICONS: Record<string, string> = {
-  kb: "book",
-  code: "code",
-  sem: "search-fuzzy",
-  gh: "github",
-  ctx: "layers",
-  impact: "pulse",
-  err: "bug",
-  sweeter: "bell",
-};
-
-const TOOL_ICONS: Record<string, string> = {
-  ask: "comment-discussion",
-  find_skills: "symbol-keyword",
-  get_skill_content: "file-text",
-  search_code: "search",
-  search_symbols: "symbol-method",
-  search_modules: "file-directory",
-  get_class_hierarchy: "type-hierarchy",
-  get_symbol_detail: "symbol-class",
-  get_symbol_source: "file-code",
-  get_module_source: "file-code",
-  get_usage_examples: "references",
-  find_usages: "references",
-  list_projects: "folder-library",
-  list_directory: "list-tree",
-  batch_search_code: "list-selection",
-  ask_codebase: "hubot",
-  search_fulltext: "whole-word",
-  find_similar: "sparkle",
-  list_repositories: "repo",
-  list_branches: "git-branch",
-  search_issues: "issues",
-  search_pull_requests: "git-pull-request",
-  search_commits: "git-commit",
-  analyze_impact: "pulse",
-  analyze_signature_impact: "symbol-parameter",
-  explain_error: "bug",
-  get_context: "layers",
-  get_context_tree: "list-tree",
-  get_hierarchical_context: "indent",
-  list_contexts: "layers",
-  list_jobs: "tasklist",
-  list_job_logs: "history",
-  list_tickets: "note",
-};
+// Category icons are sourced from OpenAPI per-operation extension
+// `x-category-icon`. We collect the first non-empty value we encounter
+// for each category while iterating paths. Tool icons come from
+// `x-icon` on each operation. Missing values mean: no icon rendered.
 
 const CODE_FIELDS = new Set([
   "snippet", "document_snippet", "content", "source",
@@ -110,15 +68,14 @@ export async function loadToolDefs(
     const { fields, isArray } = parseResponse(op, globalDefs);
 
     const operationId = op.operationId ?? path;
-    const iconKey = stripCategoryPrefix(operationId, category);
     tools.push({
       id: operationId,
       path: `/api${path}`,
       category,
       categoryLabel: CATEGORY_LABELS[category] ?? category,
-      categoryIcon: CATEGORY_ICONS[category] ?? "folder",
+      categoryIcon: op["x-category-icon"],
       label: buildLabel(op),
-      icon: TOOL_ICONS[iconKey] ?? "symbol-method",
+      icon: op["x-icon"],
       description: op.description ?? op.summary ?? "",
       params,
       responseFields: fields,
@@ -145,13 +102,6 @@ function buildLabel(op: OpenApiOperation): string {
       .replace(/\b\w/g, (c) => c.toUpperCase());
   }
   return op.summary?.split(".")[0] ?? "Unknown";
-}
-
-function stripCategoryPrefix(operationId: string, category: string): string {
-  const prefix = `${category}_`;
-  return operationId.startsWith(prefix)
-    ? operationId.slice(prefix.length)
-    : operationId;
 }
 
 function stripCategoryPrefixGuess(operationId: string): string {
@@ -296,6 +246,8 @@ interface OpenApiOperation {
     string,
     { content?: { "application/json"?: { schema?: OpenApiSchema } } }
   >;
+  "x-icon"?: string;
+  "x-category-icon"?: string;
 }
 
 interface OpenApiParameter {

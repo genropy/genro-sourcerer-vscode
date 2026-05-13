@@ -30,9 +30,11 @@ export interface ToolDef {
   path: string;
   category: string;
   categoryLabel: string;
-  categoryIcon: string;
+  /** From OpenAPI `x-category-icon` extension. Undefined → no icon shown. */
+  categoryIcon?: string;
   label: string;
-  icon: string;
+  /** From OpenAPI `x-icon` extension. Undefined → no icon shown. */
+  icon?: string;
   description: string;
   params: ParamDef[];
   responseFields: ResponseFieldDef[];

@@ -7,11 +7,13 @@ class CategoryNode extends vscode.TreeItem {
   constructor(
     public readonly category: string,
     public readonly label: string,
-    icon: string
+    icon: string | undefined
   ) {
     super(label, vscode.TreeItemCollapsibleState.Expanded);
     this.contextValue = "category";
-    this.iconPath = new vscode.ThemeIcon(icon);
+    if (icon) {
+      this.iconPath = new vscode.ThemeIcon(icon);
+    }
   }
 }
 
@@ -20,7 +22,9 @@ class ToolNode extends vscode.TreeItem {
     super(tool.label, vscode.TreeItemCollapsibleState.None);
     this.tooltip = tool.description.split("\n")[0];
     this.contextValue = "tool";
-    this.iconPath = new vscode.ThemeIcon(tool.icon);
+    if (tool.icon) {
+      this.iconPath = new vscode.ThemeIcon(tool.icon);
+    }
     this.command = {
       command: "sourcerer.open",
       title: tool.label,
@@ -65,8 +69,7 @@ export class ToolTreeProvider
       for (const [cat, tools] of this._categories) {
         const first = tools[0];
         const label = first?.categoryLabel ?? cat;
-        const icon = first?.categoryIcon ?? "folder";
-        cats.push(new CategoryNode(cat, label, icon));
+        cats.push(new CategoryNode(cat, label, first?.categoryIcon));
       }
       return cats;
     }
