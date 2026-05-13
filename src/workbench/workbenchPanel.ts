@@ -60,14 +60,9 @@ export class WorkbenchPanel {
       );
     }
     if (tabId) {
-      const tool = WorkbenchPanel._instance._toolMap.get(tabId);
-      const autoRun =
-        tool !== undefined &&
-        tool.params.every((p) => !p.required);
       WorkbenchPanel._instance._panel.webview.postMessage({
         command: "activateTab",
         tab: tabId,
-        autoRun,
       });
     }
   }
