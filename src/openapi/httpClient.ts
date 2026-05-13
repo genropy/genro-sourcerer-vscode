@@ -18,15 +18,35 @@ export class GenericHttpClient implements ToolRunner {
     private readonly _auth: AuthConfig
   ) {}
 
-  /** Fetch and parse a JSON document at the given absolute URL. */
+  /**
+   * Fetch and parse a JSON document at the given absolute URL.
+   *
+   * The schema document often lives on a different host than the API
+   * (e.g. GitHub's OpenAPI is on raw.githubusercontent.com while the
+   * API is on api.github.com). We deliberately do NOT send the API
+   * auth headers here, because:
+   *   - the schema URL is usually public;
+   *   - some hosts reject unexpected Authorization headers with 404.
+   * Only `Accept: application/json` is sent, and we tolerate other
+   * content types (raw.githubusercontent.com serves text/plain).
+   */
   async fetchJson(url: string): Promise<unknown> {
-    const resp = await fetch(url, { headers: this._headers() });
+    const resp = await fetch(url, {
+      headers: { Accept: "application/json" },
+    });
     if (!resp.ok) {
       throw new Error(
         `HTTP ${resp.status} ${resp.statusText} on ${url}`
       );
     }
-    return resp.json();
+    const text = await resp.text();
+    try {
+      return JSON.parse(text);
+    } catch (err) {
+      throw new Error(
+        `Failed to parse JSON from ${url}: ${err instanceof Error ? err.message : String(err)}`
+      );
+    }
   }
 
   /**
