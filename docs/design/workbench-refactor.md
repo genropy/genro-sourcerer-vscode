@@ -171,7 +171,7 @@ Extension Development Host webview.
 
 Single commit, scoped to the refactor. Suggested message:
 
-```
+```text
 Refactor sidebar to schema-driven Workbench
 
 - One singleton WebviewPanel (Workbench) replaces three short-lived
@@ -216,6 +216,28 @@ No Claude co-author, no AI-generated marker (project policy).
    (mirrors `ARCHITECTURE.md` but condensed for LLM context) or delete
    it in favor of pointing LLMs to `ARCHITECTURE.md` directly. Not
    blocking for the refactor itself.
+
+5. **Test setup needed two fixes plus has one blocked upstream issue.**
+   `npm test` was broken since commit `290b003` (project genesis). Two
+   problems fixed in a follow-up commit:
+   - `tsconfig.test.json` was inheriting `exclude: ["..., "test"]`
+     from `tsconfig.json` — `test/` was never compiled. Fix: add an
+     explicit `exclude` in `tsconfig.test.json` that drops `test`.
+   - `glob` was imported in `test/suite/index.ts` but never declared
+     as a devDependency. Test code relied on the version pulled in
+     transitively by mocha (`glob@8` API: promise-based), which `npm`
+     deduplicated to `glob@7` (callback-only API). Fix: declare
+     `glob@10` and `@types/glob` as explicit devDependencies.
+
+   A third issue remains: `@vscode/test-electron@2.5.2` (current
+   latest) fails to launch VSCode 1.119.1 on macOS. The downloaded
+   `.app` rejects every CLI flag (`--no-sandbox`,
+   `--extensionTestsPath`, …) because the `Electron` binary is a
+   symlink to `Code` which doesn't accept those flags in test mode.
+   Likely a regression in VSCode 1.119 / cycle break with the test
+   runner. Options to pursue: pin to an earlier VSCode version in
+   `runTest.ts` (`version: "1.118.0"` or similar), or migrate to
+   `@vscode/test-cli`. Out of scope for this refactor.
 
 ## Out of scope (do not start until this is closed)
 

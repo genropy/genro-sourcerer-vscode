@@ -2,6 +2,9 @@
 dist/
 out/
 
+# VSCode test runner cache (downloaded VSCode for @vscode/test-electron)
+.vscode-test/
+
 # Dependencies
 node_modules/
 
