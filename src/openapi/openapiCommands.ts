@@ -1,6 +1,6 @@
 import * as vscode from "vscode";
 import { WorkbenchPanel } from "../workbench/workbenchPanel";
-import { promptForSchemaConfig } from "./addSchemaDialog";
+import { openSchemaDialog } from "./addSchemaDialog";
 import { GenericHttpClient } from "./httpClient";
 import type { SchemaRegistry } from "./schemaRegistry";
 
@@ -15,7 +15,7 @@ export function registerOpenApiCommands(
 ): void {
   context.subscriptions.push(
     vscode.commands.registerCommand("openapi.addSchema", async () => {
-      const config = await promptForSchemaConfig();
+      const config = await openSchemaDialog(context.extensionUri);
       if (!config) return;
       await registry.addSchema(config);
       vscode.window.showInformationMessage(
