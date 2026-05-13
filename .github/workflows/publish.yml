@@ -5,6 +5,9 @@ on:
     tags:
       - "v*"
 
+permissions:
+  contents: write
+
 jobs:
   publish:
     runs-on: ubuntu-latest
@@ -19,10 +22,23 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
+      - name: Lint
+        run: npm run lint
+
+      - name: Type check
+        run: npx tsc --noEmit
+
       - name: Compile
         run: npm run compile
 
-      - name: Publish to Marketplace
-        run: npx @vscode/vsce publish
-        env:
-          VSCE_PAT: ${{ secrets.VSCE_PAT }}
+      - name: Package VSIX
+        run: npx @vscode/vsce package --out genro-sourcerer-vscode-${{ github.ref_name }}.vsix
+
+      - name: Create GitHub Release with VSIX asset
+        uses: softprops/action-gh-release@v2
+        with:
+          name: Sourcerer Visual ${{ github.ref_name }}
+          tag_name: ${{ github.ref_name }}
+          files: genro-sourcerer-vscode-${{ github.ref_name }}.vsix
+          generate_release_notes: true
+          fail_on_unmatched_files: true

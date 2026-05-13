@@ -192,12 +192,10 @@ No Claude co-author, no AI-generated marker (project policy).
 
 ## Open questions
 
-1. **Should `dist/` be versioned?**
-   Currently `dist/` is tracked. For a VSCode extension distributed via
-   `.vsix`, the build artefact is what users install — so versioning
-   `dist/` means a clone-and-package workflow needs no extra
-   build step. The cost: large diffs on every build, easy merge
-   conflicts. Worth a dedicated ADR (ADR-004) before deciding.
+1. **Should `dist/` be versioned?** — RESOLVED.
+   Decision: keep `dist/` gitignored; distribute the `.vsix` via
+   GitHub Releases built by `publish.yml` on every `v*` tag. See
+   `docs/decisions/ADR-004-distribution-via-github-releases.md`.
 
 2. **How aggressive should `RenderHint` inference be?**
    Today it is a fixed allowlist of field names. Should we extend it

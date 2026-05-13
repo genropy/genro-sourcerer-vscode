@@ -26,7 +26,7 @@ server.
 
 ## High-level shape
 
-```
+```text
 VSCode Extension Host
   └── extension.ts (activate / deactivate)
        ├── SourcererClient        ──► HTTP to Sourcerer REST API
@@ -53,7 +53,7 @@ flows from the OpenAPI schema fetched at activation.
 
 ## Module layout
 
-```
+```text
 src/
 ├── extension.ts           # activate(), wires everything together
 ├── api/
@@ -126,6 +126,7 @@ tool appear in the sidebar with a working form and rendered results. No
 extension code needs to change for new read endpoints.
 
 Limitations of the heuristic (intentional, documented):
+
 - Only GET endpoints are introspected. Write operations would need a
   different flow (confirmation, side-effects).
 - The renderHint inference uses a fixed allowlist of field names; new
@@ -179,7 +180,7 @@ See ADR-003 for the full reasoning.
 Three workspace-scoped settings (under `sourcerer.*`):
 
 | Key | Type | Default | Effect |
-|---|---|---|---|
+| --- | --- | --- | --- |
 | `apiUrl` | string | `https://sourcerer.genropy.net` | Base URL of the Sourcerer REST API |
 | `token` | string | `""` | Bearer token (required for non-public endpoints) |
 | `cacheTtlSeconds` | number | `300` | TTL of the HTTP response cache |
@@ -231,6 +232,7 @@ Listed here so they do not creep in by accident:
 - `docs/decisions/ADR-001-workbench-singleton.md`
 - `docs/decisions/ADR-002-schema-driven-tools.md`
 - `docs/decisions/ADR-003-separate-kb-and-tools-trees.md`
+- `docs/decisions/ADR-004-distribution-via-github-releases.md`
 - `docs/design/workbench-refactor.md` (active work)
 - `docs/design/genropy-debug.md` (deferred work item)
 - `docs/design/claude-sessions-view.md` (deferred work item)
