@@ -38,7 +38,12 @@ export class GenericHttpClient implements ToolRunner {
     path: string,
     params: Record<string, string>
   ): Promise<unknown> {
-    const url = new URL(path, this._baseUrl);
+    // WHATWG URL would treat an absolute `path` as replacing the
+    // base URL's pathname entirely, dropping any path segment of
+    // the base URL (e.g. "/api/v3"). Join manually to preserve it.
+    const trimmedBase = this._baseUrl.replace(/\/+$/, "");
+    const normalizedPath = path.startsWith("/") ? path : `/${path}`;
+    const url = new URL(trimmedBase + normalizedPath);
     for (const [k, v] of Object.entries(params)) {
       url.searchParams.set(k, v);
     }
